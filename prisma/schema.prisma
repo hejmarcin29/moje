@@ -1,0 +1,64 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL") // U CIEBIE: file:./data/panel.db
+}
+
+enum Role {
+  ADMIN
+  MONTAZYSTA
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(MONTAZYSTA)
+  firstName    String?
+  lastName     String?
+  phone        String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  sessions Session[] // relacja do sesji
+  Order    Order[]
+}
+
+model Session {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  tokenHash String   @unique // sha256(token z cookie)
+  userAgent String?
+  ip        String?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+enum OrderStatus {
+  NOWE
+  W_TRAKCIE
+  ZAKONCZONE
+  ANULOWANE
+}
+
+model Order {
+  id           Int         @id @default(autoincrement())
+  title        String
+  customerName String?
+  address      String?
+  plannedDate  DateTime?
+  status       OrderStatus @default(NOWE)
+  notes        String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  assignedToId Int?
+  assignedTo   User? @relation(fields: [assignedToId], references: [id])
+}
