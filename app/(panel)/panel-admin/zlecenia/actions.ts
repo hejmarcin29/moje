@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { Role, OrderStatus } from "@prisma/client";
+import { Role, OrderStatus, Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 
@@ -43,7 +43,7 @@ export async function updateOrderAction(fd: FormData): Promise<ActionResult> {
   const status = String(fd.get("status") ?? "") as OrderStatus;
   const plannedDateRaw = String(fd.get("plannedDate") ?? "") || null;
 
-  const data: any = {};
+  const data: Prisma.OrderUpdateInput = {};
   if (title) data.title = title;
   if (plannedDateRaw) data.plannedDate = new Date(plannedDateRaw);
   if (status && Object.values(OrderStatus).includes(status)) data.status = status;
