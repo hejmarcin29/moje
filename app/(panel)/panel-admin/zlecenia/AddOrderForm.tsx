@@ -23,18 +23,70 @@ export default function AddOrderForm({ monters }: { monters: Monter[] }) {
       <h2 className="text-lg font-medium">Dodaj zlecenie</h2>
 
       <div className="grid gap-1">
-        <label className="text-sm">Tytuł *</label>
-        <input name="title" required className="w-full rounded-md border px-3 py-2" placeholder="Montaż paneli — ul. Kowalska 12" />
+        <label className="text-sm">Klient</label>
+        <input
+          name="customerName"
+          required
+          className="w-full rounded-md border px-3 py-2"
+          placeholder="Jan Kowalski"
+        />
       </div>
 
       <div className="grid gap-1">
-        <label className="text-sm">Klient</label>
-        <input name="customerName" className="w-full rounded-md border px-3 py-2" />
+        <label className="text-sm">Miasto</label>
+        <input
+          name="city"
+          required
+          className="w-full rounded-md border px-3 py-2"
+          placeholder="Warszawa"
+        />
+      </div>
+
+      <div className="grid gap-1">
+        <label className="text-sm">Telefon</label>
+        <input
+          name="phone"
+          required
+          className="w-full rounded-md border px-3 py-2"
+          placeholder="600 000 000"
+        />
       </div>
 
       <div className="grid gap-1">
         <label className="text-sm">Adres</label>
         <input name="address" className="w-full rounded-md border px-3 py-2" />
+      </div>
+
+      <div className="grid gap-1">
+        <label className="text-sm">Wstępny metraż (m²)</label>
+        <input
+          name="initialArea"
+          type="number"
+          min="0"
+          step="0.01"
+          required
+          className="w-full rounded-md border px-3 py-2"
+          placeholder="45"
+        />
+      </div>
+
+      <div className="grid gap-1">
+        <label className="text-sm">Wybrany panel</label>
+        <input
+          name="selectedPanel"
+          className="w-full rounded-md border px-3 py-2"
+          placeholder="Panel Dąb Naturalny"
+        />
+      </div>
+
+      <div className="grid gap-1">
+        <label className="text-sm">Notatka dla montera</label>
+        <textarea
+          name="notes"
+          rows={3}
+          className="w-full rounded-md border px-3 py-2"
+          placeholder="Dodatkowe informacje od klienta"
+        />
       </div>
 
       <div className="grid gap-1">

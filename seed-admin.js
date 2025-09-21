@@ -1,12 +1,11 @@
-const { PrismaClient } = require("@prisma/client");
-const bcrypt = require("bcryptjs");
-
-(async () => {
+;(async () => {
+  const { PrismaClient } = await import("@prisma/client");
+  const { hashSync } = await import("bcryptjs");
   const prisma = new PrismaClient();
   try {
     const email = "admin@primepodloga.pl";
     const pass  = "AdminHaslo123!";
-    const passwordHash = bcrypt.hashSync(pass, 10);
+    const passwordHash = hashSync(pass, 10);
 
     await prisma.user.upsert({
       where:  { email },
