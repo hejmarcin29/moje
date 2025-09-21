@@ -1,70 +1,76 @@
 "use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
-  const router = useRouter();
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [err, setErr] = useState<string | null>(null)
+  const router = useRouter()
 
   async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setErr(null);
-    setLoading(true);
+    e.preventDefault()
+    setErr(null)
+    setLoading(true)
     try {
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
+      })
+      const data = await res.json()
       if (!res.ok || !data?.ok) {
-        setErr(data?.error || "Błędny email lub hasło");
-        return;
+        setErr(data?.error || "Błędny email lub hasło")
+        return
       }
       // na razie bez sesji – po prostu przenieś na dashboard
-      router.push("/dashboard");
+      router.push("/dashboard")
     } catch {
-      setErr("Błąd połączenia");
+      setErr("Błąd połączenia")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   }
 
   return (
-    <main style={{ maxWidth: 420, margin: "48px auto", fontFamily: "system-ui, sans-serif" }}>
-      <h1 style={{ fontSize: 24, marginBottom: 16 }}>Logowanie</h1>
-      <form onSubmit={onSubmit}>
-        <label style={{ display: "block", marginBottom: 12 }}>
-          Email
-          <input
+    <main className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center gap-6 px-4">
+      <div className="space-y-1">
+        <h1 className="text-3xl font-semibold">Logowanie</h1>
+        <p className="text-sm text-muted-foreground">Uzyskaj dostęp do panelu administracyjnego.</p>
+      </div>
+      <form onSubmit={onSubmit} className="space-y-4 rounded-lg border p-6 shadow-sm">
+        <div className="space-y-2">
+          <Label htmlFor="login-email">Email</Label>
+          <Input
+            id="login-email"
             type="email"
-            style={{ width: "100%", padding: 8, marginTop: 6 }}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="np. jan.kowalski@example.com"
             required
             autoFocus
           />
-        </label>
-        <label style={{ display: "block", marginBottom: 12 }}>
-          Hasło
-          <input
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="login-password">Hasło</Label>
+          <Input
+            id="login-password"
             type="password"
-            style={{ width: "100%", padding: 8, marginTop: 6 }}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Wpisz swoje hasło"
             required
           />
-        </label>
-        <button disabled={loading} style={{ padding: "10px 16px" }}>
+        </div>
+        <Button disabled={loading} type="submit">
           {loading ? "Loguję..." : "Zaloguj"}
-        </button>
+        </Button>
       </form>
-      {err && <p style={{ color: "crimson", marginTop: 12 }}>{err}</p>}
+      {err && <p className="text-sm text-destructive">{err}</p>}
     </main>
-  );
+  )
 }

@@ -1,16 +1,24 @@
-import { getSession } from "@/lib/session";
-import { redirect } from "next/navigation";
-import prisma from "@/lib/prisma";
-import { Role } from "@prisma/client";
-import { formatArea } from "@/lib/orderTitle";
-import AddOrderForm from "./AddOrderForm";
-import OrderRowActions from "./OrderRowActions";
+import { getSession } from "@/lib/session"
+import { redirect } from "next/navigation"
+import prisma from "@/lib/prisma"
+import { Role } from "@prisma/client"
+import { formatArea } from "@/lib/orderTitle"
+import AddOrderForm from "./AddOrderForm"
+import OrderRowActions from "./OrderRowActions"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 export const metadata = { title: "Zlecenia — Admin" };
 
 export default async function OrdersPage() {
-  const s = await getSession();
-  if (!s || s.user.role !== Role.ADMIN) redirect("/");
+  const s = await getSession()
+  if (!s || s.user.role !== Role.ADMIN) redirect("/")
 
   const [orders, monters] = await Promise.all([
     prisma.order.findMany({
@@ -51,43 +59,43 @@ export default async function OrdersPage() {
       select: { id: true, firstName: true, email: true },
       orderBy: [{ firstName: "asc" }, { email: "asc" }],
     }),
-  ]);
+  ])
 
-  const toDateInput = (d: Date | null) => (d ? new Date(d).toISOString().slice(0, 10) : null);
+  const toDateInput = (d: Date | null) => (d ? new Date(d).toISOString().slice(0, 10) : null)
 
   return (
-    <main className="p-8 space-y-8">
+    <main className="space-y-8 p-8">
       <h1 className="text-2xl font-semibold">Zlecenia</h1>
 
-      <div className="overflow-x-auto rounded-lg border">
-        <table className="w-full text-sm">
-          <thead className="bg-neutral-50">
-            <tr>
-              <th className="px-3 py-2 text-left">ID</th>
-              <th className="px-3 py-2 text-left">Tytuł</th>
-              <th className="px-3 py-2 text-left">Klient / Kontakt</th>
-              <th className="px-3 py-2 text-left">Panele &amp; pomiar</th>
-              <th className="px-3 py-2 text-left">Monter</th>
-              <th className="px-3 py-2 text-left">Edycja</th>
-            </tr>
-          </thead>
-          <tbody>
+      <div className="rounded-lg border">
+        <Table className="text-sm">
+          <TableHeader className="bg-neutral-50">
+            <TableRow>
+              <TableHead>ID</TableHead>
+              <TableHead>Tytuł</TableHead>
+              <TableHead>Klient / Kontakt</TableHead>
+              <TableHead>Panele &amp; pomiar</TableHead>
+              <TableHead>Monter</TableHead>
+              <TableHead>Edycja</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {orders.map((o) => {
               const diff =
                 o.measuredArea !== null && o.initialArea !== null
                   ? o.measuredArea - o.initialArea
-                  : null;
+                  : null
 
               return (
-                <tr key={o.id} className="border-t align-top">
-                  <td className="px-3 py-2">{o.id}</td>
-                  <td className="px-3 py-2">
+                <TableRow key={o.id} className="align-top">
+                  <TableCell>{o.id}</TableCell>
+                  <TableCell>
                     <div className="font-medium">{o.title}</div>
                     <div className="text-xs text-neutral-500">
                       {o.status} · plan: {toDateInput(o.plannedDate) ?? "—"}
                     </div>
-                  </td>
-                  <td className="px-3 py-2 space-y-1">
+                  </TableCell>
+                  <TableCell className="space-y-1">
                     <div className="font-medium">{o.customerName ?? "—"}</div>
                     <div className="text-xs text-neutral-500">{o.city ?? "—"}</div>
                     <div className="text-xs text-neutral-500">tel. {o.phone ?? "—"}</div>
@@ -95,8 +103,8 @@ export default async function OrdersPage() {
                     {o.notes && (
                       <div className="text-xs text-neutral-500">Notatka: {o.notes}</div>
                     )}
-                  </td>
-                  <td className="px-3 py-2 space-y-1">
+                  </TableCell>
+                  <TableCell className="space-y-1">
                     <div>{o.selectedPanel ?? "—"}</div>
                     <div className="text-xs text-neutral-500">
                       Wstępnie: {formatArea(o.initialArea) ?? "—"} m²
@@ -128,10 +136,10 @@ export default async function OrdersPage() {
                         {o.measurement.carryNote && <div>Wnoszenie: {o.measurement.carryNote}</div>}
                       </div>
                     )}
-                  </td>
-                  <td className="px-3 py-2">
+                  </TableCell>
+                  <TableCell>
                     {o.assignedTo ? (o.assignedTo.firstName ?? o.assignedTo.email) : "—"}
-                  </td>
+                  </TableCell>
                   <OrderRowActions
                     id={o.id}
                     status={o.status}
@@ -146,14 +154,14 @@ export default async function OrdersPage() {
                     selectedPanel={o.selectedPanel ?? ""}
                     notes={o.notes ?? ""}
                   />
-                </tr>
-              );
+                </TableRow>
+              )
             })}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       <AddOrderForm monters={monters} />
     </main>
-  );
+  )
 }
