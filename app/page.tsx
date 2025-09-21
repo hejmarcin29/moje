@@ -1,9 +1,6 @@
 "use client";
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 type LoginResponse = {
   ok?: boolean;
@@ -25,93 +22,88 @@ function isLoginResponse(value: unknown): value is LoginResponse {
 }
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   async function onSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (busy) return
-    setBusy(true)
-    setError(null)
+    e.preventDefault();
+    if (busy) return;
+    setBusy(true);
+    setError(null);
     try {
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
-      })
+      });
 
       // bezpieczna próba odczytu JSON
       let data: unknown = null;
       try {
-        data = await res.json()
+        data = await res.json();
       } catch {
-        data = null
+        data = null;
       }
 
-      const payload = isLoginResponse(data) ? data : null
+      const payload = isLoginResponse(data) ? data : null;
 
       if (!res.ok || payload?.ok !== true) {
-        throw new Error(payload?.error || "Błędne dane")
+        throw new Error(payload?.error || "Błędne dane");
       }
-      router.push("/dashboard")
+      router.push("/dashboard");
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : null
-      setError(message || "Błąd logowania")
+      const message = err instanceof Error ? err.message : null;
+      setError(message || "Błąd logowania");
     } finally {
-      setBusy(false)
+      setBusy(false);
     }
   }
 
   return (
-    <main className="grid min-h-screen place-items-center px-4">
-      <form onSubmit={onSubmit} className="w-full max-w-sm space-y-4 rounded-2xl border border-neutral-200 p-6 shadow-sm">
-        <div>
-          <h1 className="text-2xl font-semibold">Logowanie</h1>
-          <p className="text-sm text-neutral-500">Zaloguj się do panelu firmowego.</p>
-        </div>
+    <main className="min-h-screen grid place-items-center px-4">
+      <form onSubmit={onSubmit} className="w-full max-w-sm rounded-2xl border border-neutral-200 p-6 shadow-sm">
+        <h1 className="mb-4 text-2xl font-semibold">Logowanie</h1>
 
-        <div className="space-y-2">
-          <Label className="text-neutral-600" htmlFor="email">
-            Email
-          </Label>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            inputMode="email"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="email@domena.pl"
-            required
-          />
-        </div>
+        <label className="mb-2 block text-sm text-neutral-600" htmlFor="email">Email</label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          inputMode="email"
+          autoComplete="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="mb-4 w-full rounded-lg border border-neutral-300 px-3 py-2 outline-none focus:border-neutral-500 focus:ring-2 focus:ring-neutral-200"
+          placeholder="email@domena.pl"
+          required
+        />
 
-        <div className="space-y-2">
-          <Label className="text-neutral-600" htmlFor="password">
-            Hasło
-          </Label>
-          <Input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            required
-          />
-        </div>
+        <label className="mb-2 block text-sm text-neutral-600" htmlFor="password">Hasło</label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          autoComplete="current-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="mb-4 w-full rounded-lg border border-neutral-300 px-3 py-2 outline-none focus:border-neutral-500 focus:ring-2 focus:ring-neutral-200"
+          placeholder="••••••••"
+          required
+        />
 
-        <Button disabled={busy} type="submit" className="w-full">
+        <button
+          disabled={busy}
+          type="submit"
+          className="w-full rounded-lg bg-black px-4 py-2 text-white transition active:scale-[.99] disabled:opacity-60"
+        >
           {busy ? "Loguję…" : "Zaloguj"}
-        </Button>
+        </button>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
       </form>
     </main>
-  )
+  );
 }

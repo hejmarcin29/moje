@@ -1,19 +1,8 @@
-"use client"
+"use client";
 
-import { useState, useTransition } from "react"
-import { TrimMode } from "@prisma/client"
-import { saveMeasurementAction } from "../actions"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { useState, useTransition } from "react";
+import { TrimMode } from "@prisma/client";
+import { saveMeasurementAction } from "../actions";
 
 type Props = {
   orderId: number;
@@ -32,32 +21,31 @@ type Props = {
     deliveryOffsetDays: number | null;
     carryNote: string | null;
   } | null;
-}
+};
 
 export default function MeasurementForm(props: Props) {
-  const [message, setMessage] = useState<string | null>(null)
-  const [pending, startTransition] = useTransition()
-  const [mode, setMode] = useState<TrimMode>(props.measurement?.trimMode ?? TrimMode.WITH_PANELS)
+  const [message, setMessage] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
+  const [mode, setMode] = useState<TrimMode>(props.measurement?.trimMode ?? TrimMode.WITH_PANELS);
 
-  const installationAddress = props.measurement?.installationAddress ?? props.orderAddress ?? ""
-  const panelName = props.measurement?.panelName ?? props.selectedPanel ?? ""
-  const measuredAreaDefault = props.measurement?.measuredArea ?? ""
-  const wastePercentageDefault = props.measurement?.wastePercentage?.toString() ?? "10"
-  const installationDateDefault = props.measurement?.installationDate ?? null
-  const deliveryDateDefault = props.measurement?.deliveryDate ?? null
-  const deliveryOffsetDefault = props.measurement?.deliveryOffsetDays?.toString() ?? ""
-  const carryNoteDefault = props.measurement?.carryNote ?? ""
+  const installationAddress = props.measurement?.installationAddress ?? props.orderAddress ?? "";
+  const panelName = props.measurement?.panelName ?? props.selectedPanel ?? "";
+  const measuredAreaDefault = props.measurement?.measuredArea ?? "";
+  const wastePercentageDefault = props.measurement?.wastePercentage?.toString() ?? "10";
+  const installationDateDefault = props.measurement?.installationDate ?? null;
+  const deliveryDateDefault = props.measurement?.deliveryDate ?? null;
+  const deliveryOffsetDefault = props.measurement?.deliveryOffsetDays?.toString() ?? "";
+  const carryNoteDefault = props.measurement?.carryNote ?? "";
 
   return (
     <form
       className="space-y-4 rounded-lg border p-4"
       action={(fd) =>
         startTransition(async () => {
-          setMessage(null)
-          fd.set("orderId", String(props.orderId))
-          fd.set("trimMode", mode)
-          const res = await saveMeasurementAction(fd)
-          setMessage(res.error ?? (res.ok ? "Pomiar zapisany." : null))
+          setMessage(null);
+          fd.set("orderId", String(props.orderId));
+          const res = await saveMeasurementAction(fd);
+          setMessage(res.error ?? (res.ok ? "Pomiar zapisany." : null));
         })
       }
     >
@@ -70,52 +58,41 @@ export default function MeasurementForm(props: Props) {
 
       <div className="grid gap-2 sm:grid-cols-2">
         <div className="grid gap-1 sm:col-span-2">
-          <Label htmlFor="installation-address" className="text-sm">
-            Adres montażu
-          </Label>
-          <Textarea
-            id="installation-address"
+          <label className="text-sm">Adres montażu</label>
+          <textarea
             name="installationAddress"
             required
             defaultValue={installationAddress}
             rows={2}
+            className="w-full rounded-md border px-3 py-2"
           />
         </div>
         <div className="grid gap-1">
-          <Label htmlFor="trim-mode" className="text-sm">
-            Listwy
-          </Label>
-          <Select value={mode} onValueChange={(value) => setMode(value as TrimMode)}>
-            <SelectTrigger id="trim-mode">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={TrimMode.WITH_PANELS}>Razem z panelami</SelectItem>
-              <SelectItem value={TrimMode.SEPARATE}>Osobno</SelectItem>
-            </SelectContent>
-          </Select>
-          <input type="hidden" name="trimMode" value={mode} />
+          <label className="text-sm">Listwy</label>
+          <select
+            name="trimMode"
+            value={mode}
+            onChange={(e) => setMode(e.target.value as TrimMode)}
+            className="w-full rounded-md border px-3 py-2"
+          >
+            <option value={TrimMode.WITH_PANELS}>Razem z panelami</option>
+            <option value={TrimMode.SEPARATE}>Osobno</option>
+          </select>
         </div>
         <div className="grid gap-1">
-          <Label className="text-sm" htmlFor="initial-area-readonly">
-            Wstępny metraż
-          </Label>
-          <Input
-            id="initial-area-readonly"
+          <label className="text-sm">Wstępny metraż</label>
+          <input
             value={props.initialArea}
             readOnly
-            className="bg-neutral-100 text-neutral-500"
+            className="w-full rounded-md border bg-neutral-100 px-3 py-2 text-neutral-500"
           />
         </div>
         <div className="grid gap-1">
-          <Label className="text-sm" htmlFor="measured-area-readonly">
-            Ostatni pomiar
-          </Label>
-          <Input
-            id="measured-area-readonly"
+          <label className="text-sm">Ostatni pomiar</label>
+          <input
             value={props.measuredArea}
             readOnly
-            className="bg-neutral-100 text-neutral-500"
+            className="w-full rounded-md border bg-neutral-100 px-3 py-2 text-neutral-500"
           />
         </div>
       </div>
@@ -127,43 +104,37 @@ export default function MeasurementForm(props: Props) {
         </p>
 
         <div className="grid gap-1">
-          <Label htmlFor="panel-name" className="text-sm">
-            Panel
-          </Label>
-          <Input
-            id="panel-name"
+          <label className="text-sm">Panel</label>
+          <input
             name="panelName"
             defaultValue={panelName}
             placeholder="Panel Dąb Naturalny"
+            className="w-full rounded-md border px-3 py-2"
           />
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="grid gap-1">
-            <Label htmlFor="measured-area" className="text-sm">
-              Pomiar (m²)
-            </Label>
-            <Input
-              id="measured-area"
+            <label className="text-sm">Pomiar (m²)</label>
+            <input
               name="measuredArea"
               type="number"
               min="0"
               step="0.01"
               defaultValue={measuredAreaDefault}
+              className="w-full rounded-md border px-3 py-2"
               required
             />
           </div>
           <div className="grid gap-1">
-            <Label htmlFor="waste-percentage" className="text-sm">
-              Zapas na docinki (%)
-            </Label>
-            <Input
-              id="waste-percentage"
+            <label className="text-sm">Zapas na docinki (%)</label>
+            <input
               name="wastePercentage"
               type="number"
               min="5"
               max="20"
               defaultValue={wastePercentageDefault}
+              className="w-full rounded-md border px-3 py-2"
               required
             />
           </div>
@@ -171,67 +142,67 @@ export default function MeasurementForm(props: Props) {
 
         <div className="grid gap-3 sm:grid-cols-3">
           <div className="grid gap-1">
-            <Label htmlFor="installation-date" className="text-sm">
-              Termin montażu
-            </Label>
-            <Input
-              id="installation-date"
+            <label className="text-sm">Termin montażu</label>
+            <input
               name="installationDate"
               type="date"
               defaultValue={installationDateDefault ?? undefined}
+              className="w-full rounded-md border px-3 py-2"
             />
           </div>
           <div className="grid gap-1">
-            <Label htmlFor="delivery-date" className="text-sm">
-              Termin dostawy paneli
-            </Label>
-            <Input
-              id="delivery-date"
+            <label className="text-sm">Termin dostawy paneli</label>
+            <input
               name="deliveryDate"
               type="date"
               defaultValue={deliveryDateDefault ?? undefined}
+              className="w-full rounded-md border px-3 py-2"
             />
           </div>
           <div className="grid gap-1">
-            <Label htmlFor="delivery-offset" className="text-sm">
-              Ile dni wcześniej?
-            </Label>
-            <Input
-              id="delivery-offset"
+            <label className="text-sm">Ile dni wcześniej?</label>
+            <input
               name="deliveryOffsetDays"
               type="number"
               min="0"
               defaultValue={deliveryOffsetDefault}
+              className="w-full rounded-md border px-3 py-2"
             />
           </div>
         </div>
 
         <div className="grid gap-1">
-          <Label htmlFor="carry-note" className="text-sm">
-            Wnoszenie
-          </Label>
-          <Textarea
-            id="carry-note"
+          <label className="text-sm">Wnoszenie</label>
+          <textarea
             name="carryNote"
             rows={2}
             placeholder="Np. 4 piętro bez windy"
             defaultValue={carryNoteDefault}
+            className="w-full rounded-md border px-3 py-2"
           />
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <Button type="submit" disabled={pending} className="font-medium">
+          <button
+            type="submit"
+            disabled={pending}
+            className="inline-flex items-center rounded-md border px-4 py-2 font-medium hover:bg-neutral-50 disabled:opacity-60"
+          >
             {pending ? "Zapisuję..." : "Zapisz pomiar"}
-          </Button>
+          </button>
           {mode === TrimMode.SEPARATE && (
-            <Button type="button" variant="outline" disabled className="border-dashed text-neutral-400">
+            <button
+              type="button"
+              disabled
+              className="inline-flex items-center rounded-md border border-dashed px-4 py-2 text-neutral-400"
+            >
               Pomiar listwy (w przygotowaniu)
-            </Button>
+            </button>
           )}
         </div>
       </fieldset>
 
-      {message && <p className="text-sm text-destructive">{message}</p>}
+      {message && <p className="text-sm text-red-600">{message}</p>}
     </form>
-  )
+  );
 }

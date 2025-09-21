@@ -1,61 +1,54 @@
-import { getSession } from "@/lib/session"
-import { redirect } from "next/navigation"
-import prisma from "@/lib/prisma"
-import { Role } from "@prisma/client"
-import AddUserForm from "./AddUserForm"
-import UserRowActions from "./UserRowActions"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+// app/(panel)/panel-admin/uzytkownicy/page.tsx
+import { getSession } from "@/lib/session";
+import { redirect } from "next/navigation";
+import prisma from "@/lib/prisma";
+import { Role } from "@prisma/client";
+import AddUserForm from "./AddUserForm";
+import UserRowActions from "./UserRowActions";
 
 export const metadata = { title: "Użytkownicy — Admin" };
 
 export default async function UsersPage() {
-  const s = await getSession()
-  if (!s || s.user.role !== Role.ADMIN) redirect("/")
+  const s = await getSession();
+  if (!s || s.user.role !== Role.ADMIN) redirect("/");
 
   const users = await prisma.user.findMany({
     orderBy: { id: "desc" },
     select: { id: true, email: true, firstName: true, role: true, isActive: true },
-  })
+  });
 
   return (
-    <main className="space-y-8 p-8">
+    <main className="p-8 space-y-8">
       <h1 className="text-2xl font-semibold">Użytkownicy</h1>
 
-      <div className="rounded-lg border">
-        <Table className="text-sm">
-          <TableHeader className="bg-neutral-50">
-            <TableRow>
-              <TableHead>ID</TableHead>
-              <TableHead>E-mail</TableHead>
-              <TableHead>Edycja</TableHead>
-              <TableHead>Rola</TableHead>
-              <TableHead>Aktywny</TableHead>
-              <TableHead>Akcje</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+      <div className="overflow-x-auto rounded-lg border">
+        <table className="w-full text-sm">
+          <thead className="bg-neutral-50">
+            <tr>
+              <th className="px-3 py-2 text-left">ID</th>
+              <th className="px-3 py-2 text-left">E-mail</th>
+              <th className="px-3 py-2 text-left">Edycja</th>
+              <th className="px-3 py-2 text-left">Rola</th>
+              <th className="px-3 py-2 text-left">Aktywny</th>
+              <th className="px-3 py-2 text-left">Akcje</th>
+            </tr>
+          </thead>
+          <tbody>
             {users.map((u) => (
-              <TableRow key={u.id} className="align-top">
-                <TableCell>{u.id}</TableCell>
-                <TableCell>{u.email}</TableCell>
-                <TableCell>{u.firstName ?? "—"}</TableCell>
-                <TableCell>{u.role}</TableCell>
-                <TableCell>{u.isActive ? "tak" : "nie"}</TableCell>
+              <tr key={u.id} className="border-t align-top">
+                <td className="px-3 py-2">{u.id}</td>
+                <td className="px-3 py-2">{u.email}</td>
+                <td className="px-3 py-2">{u.firstName ?? "—"}</td>
+                <td className="px-3 py-2">{u.role}</td>
+                <td className="px-3 py-2">{u.isActive ? "tak" : "nie"}</td>
                 <UserRowActions id={u.id} firstName={u.firstName} role={u.role} isActive={u.isActive} />
-              </TableRow>
+              </tr>
             ))}
-          </TableBody>
-        </Table>
+          </tbody>
+        </table>
       </div>
 
       <AddUserForm />
     </main>
-  )
+  );
 }

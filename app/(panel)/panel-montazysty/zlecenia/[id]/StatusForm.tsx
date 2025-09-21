@@ -1,18 +1,8 @@
-"use client"
+"use client";
 
-import { useState, useTransition } from "react"
-import type { OrderStatus } from "@prisma/client"
-import { updateMyOrderAction } from "../actions"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { useState, useTransition } from "react";
+import type { OrderStatus } from "@prisma/client";
+import { updateMyOrderAction } from "../actions";
 
 type Props = {
   orderId: number;
@@ -21,20 +11,18 @@ type Props = {
 };
 
 export default function StatusForm({ orderId, status, notes }: Props) {
-  const [message, setMessage] = useState<string | null>(null)
-  const [statusValue, setStatusValue] = useState<OrderStatus>(status)
-  const [pending, startTransition] = useTransition()
+  const [message, setMessage] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
 
   return (
     <form
       className="space-y-3 rounded-lg border p-4"
       action={(fd) =>
         startTransition(async () => {
-          setMessage(null)
-          fd.set("id", String(orderId))
-          fd.set("status", statusValue)
-          const res = await updateMyOrderAction(fd)
-          setMessage(res.error ?? (res.ok ? "Zapisano status." : null))
+          setMessage(null);
+          fd.set("id", String(orderId));
+          const res = await updateMyOrderAction(fd);
+          setMessage(res.error ?? (res.ok ? "Zapisano status." : null));
         })
       }
     >
@@ -46,41 +34,34 @@ export default function StatusForm({ orderId, status, notes }: Props) {
       </div>
 
       <div className="grid gap-1 sm:max-w-xs">
-        <Label htmlFor="order-status" className="text-sm">
-          Status
-        </Label>
-        <Select value={statusValue} onValueChange={(value) => setStatusValue(value as OrderStatus)}>
-          <SelectTrigger id="order-status">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="NOWE">NOWE</SelectItem>
-            <SelectItem value="W_TRAKCIE">W TRAKCIE</SelectItem>
-            <SelectItem value="ZAKONCZONE">ZAKOŃCZONE</SelectItem>
-            <SelectItem value="ANULOWANE">ANULOWANE</SelectItem>
-          </SelectContent>
-        </Select>
-        <input type="hidden" name="status" value={statusValue} />
+        <label className="text-sm">Status</label>
+        <select name="status" defaultValue={status} className="rounded-md border px-2 py-1">
+          <option value="NOWE">NOWE</option>
+          <option value="W_TRAKCIE">W TRAKCIE</option>
+          <option value="ZAKONCZONE">ZAKOŃCZONE</option>
+          <option value="ANULOWANE">ANULOWANE</option>
+        </select>
       </div>
 
       <div className="grid gap-1">
-        <Label htmlFor="order-note" className="text-sm">
-          Notatka
-        </Label>
-        <Textarea
-          id="order-note"
+        <label className="text-sm">Notatka</label>
+        <textarea
           name="notes"
           rows={3}
           defaultValue={notes ?? ""}
           placeholder="Wpisz dodatkowe informacje..."
+          className="w-full rounded-md border px-3 py-2"
         />
       </div>
 
-      <Button disabled={pending} className="font-medium">
+      <button
+        disabled={pending}
+        className="rounded-md border px-4 py-2 font-medium hover:bg-neutral-50 disabled:opacity-60"
+      >
         {pending ? "Zapisuję..." : "Zapisz"}
-      </Button>
+      </button>
 
-      {message && <p className="text-sm text-destructive">{message}</p>}
+      {message && <p className="text-sm text-red-600">{message}</p>}
     </form>
-  )
+  );
 }
