@@ -48,11 +48,21 @@ enum OrderStatus {
   ANULOWANE
 }
 
+enum TrimMode {
+  WITH_PANELS
+  SEPARATE
+}
+
 model Order {
   id           Int         @id @default(autoincrement())
   title        String
   customerName String?
   address      String?
+  city         String?
+  phone        String?
+  initialArea  Float?
+  measuredArea Float?
+  selectedPanel String?
   plannedDate  DateTime?
   status       OrderStatus @default(NOWE)
   notes        String?
@@ -61,4 +71,23 @@ model Order {
 
   assignedToId Int?
   assignedTo   User? @relation(fields: [assignedToId], references: [id])
+
+  measurement Measurement?
+}
+
+model Measurement {
+  id                  Int       @id @default(autoincrement())
+  order               Order     @relation(fields: [orderId], references: [id])
+  orderId             Int       @unique
+  installationAddress String
+  trimMode            TrimMode
+  panelName           String
+  measuredArea        Float
+  wastePercentage     Int
+  installationDate    DateTime?
+  deliveryDate        DateTime?
+  deliveryOffsetDays  Int?
+  carryNote           String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 }
