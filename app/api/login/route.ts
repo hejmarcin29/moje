@@ -40,9 +40,13 @@ export async function POST(req: Request) {
   });
 
   const res = NextResponse.json({ ok:true });
+  const isDev = process.env.NODE_ENV === "development";
   res.cookies.set(COOKIE, token, {
-    httpOnly: true, sameSite: "lax", path: "/", maxAge: SESSION_DAYS*24*60*60,
-    // secure: true, // włącz w produkcji (HTTPS)
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: SESSION_DAYS*24*60*60,
+    secure: !isDev,
   });
   return res;
 }

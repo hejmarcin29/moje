@@ -2,6 +2,25 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+type LoginResponse = {
+  ok?: boolean;
+  error?: string;
+};
+
+function isLoginResponse(value: unknown): value is LoginResponse {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const candidate = value as { ok?: unknown; error?: unknown };
+  if (typeof candidate.ok !== "undefined" && typeof candidate.ok !== "boolean") {
+    return false;
+  }
+  if (typeof candidate.error !== "undefined" && typeof candidate.error !== "string") {
+    return false;
+  }
+  return true;
+}
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,15 +41,22 @@ export default function LoginPage() {
       });
 
       // bezpieczna próba odczytu JSON
-      let data: any = null;
-      try { data = await res.json(); } catch {}
+      let data: unknown = null;
+      try {
+        data = await res.json();
+      } catch {
+        data = null;
+      }
 
-      if (!res.ok || !data?.ok) {
-        throw new Error(data?.error || "Błędne dane");
+      const payload = isLoginResponse(data) ? data : null;
+
+      if (!res.ok || payload?.ok !== true) {
+        throw new Error(payload?.error || "Błędne dane");
       }
       router.push("/dashboard");
-    } catch (err: any) {
-      setError(err?.message || "Błąd logowania");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : null;
+      setError(message || "Błąd logowania");
     } finally {
       setBusy(false);
     }

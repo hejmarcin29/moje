@@ -3,8 +3,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("admin@primepodloga.pl");
-  const [password, setPassword] = useState("AdminHaslo123!");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const router = useRouter();
@@ -40,9 +40,11 @@ export default function LoginPage() {
         <label style={{ display: "block", marginBottom: 12 }}>
           Email
           <input
+            type="email"
             style={{ width: "100%", padding: 8, marginTop: 6 }}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            placeholder="np. jan.kowalski@example.com"
             required
             autoFocus
           />
@@ -54,6 +56,7 @@ export default function LoginPage() {
             style={{ width: "100%", padding: 8, marginTop: 6 }}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            placeholder="Wpisz swoje hasło"
             required
           />
         </label>
