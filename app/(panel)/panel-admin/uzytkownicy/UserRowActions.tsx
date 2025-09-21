@@ -1,8 +1,18 @@
-"use client";
+"use client"
 
-import { useState, useTransition } from "react";
-import { updateUserAction, toggleActiveAction, resetPasswordAction } from "./actions";
-import type { Role } from "@prisma/client";
+import { useState, useTransition } from "react"
+import { updateUserAction, toggleActiveAction, resetPasswordAction } from "./actions"
+import type { Role } from "@prisma/client"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 export default function UserRowActions(props: {
   id: number;
@@ -10,55 +20,74 @@ export default function UserRowActions(props: {
   role: Role;
   isActive: boolean;
 }) {
-  const [msg, setMsg] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [msg, setMsg] = useState<string | null>(null)
+  const [role, setRole] = useState<Role>(props.role)
+  const [pending, start] = useTransition()
 
   return (
-    <td className="px-3 py-2 space-y-2">
+    <td className="space-y-2 px-3 py-2">
       {/* Edycja imienia + roli */}
       <form
         className="flex items-center gap-2"
         action={(fd) =>
           start(async () => {
-            setMsg(null);
-            fd.set("id", String(props.id));
-            const res = await updateUserAction(fd);
-            setMsg(res.error ?? (res.ok ? "Zapisano." : null));
+            setMsg(null)
+            fd.set("id", String(props.id))
+            fd.set("role", role)
+            const res = await updateUserAction(fd)
+            setMsg(res.error ?? (res.ok ? "Zapisano." : null))
           })
         }
       >
         <input type="hidden" name="id" value={props.id} />
-        <input
-          name="firstName"
-          defaultValue={props.firstName ?? ""}
-          placeholder="Imię"
-          className="rounded-md border px-2 py-1"
-        />
-        <select name="role" defaultValue={props.role} className="rounded-md border px-2 py-1">
-          <option value="MONTAZYSTA">MONTAŻYSTA</option>
-          <option value="ADMIN">ADMIN</option>
-        </select>
-        <button disabled={pending} className="rounded-md border px-2 py-1 hover:bg-neutral-50 disabled:opacity-60">
+        <div className="grid gap-1">
+          <Label className="sr-only" htmlFor={`user-first-name-${props.id}`}>
+            Imię
+          </Label>
+          <Input
+            id={`user-first-name-${props.id}`}
+            name="firstName"
+            defaultValue={props.firstName ?? ""}
+            placeholder="Imię"
+            className="h-9 w-32"
+          />
+        </div>
+        <div className="grid gap-1">
+          <Label className="sr-only" htmlFor={`user-role-${props.id}`}>
+            Rola
+          </Label>
+          <Select value={role} onValueChange={(value) => setRole(value as Role)}>
+            <SelectTrigger id={`user-role-${props.id}`} className="h-9 w-40">
+              <SelectValue placeholder="Rola" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="MONTAZYSTA">MONTAŻYSTA</SelectItem>
+              <SelectItem value="ADMIN">ADMIN</SelectItem>
+            </SelectContent>
+          </Select>
+          <input type="hidden" name="role" value={role} />
+        </div>
+        <Button variant="outline" size="sm" disabled={pending}>
           Zapisz
-        </button>
+        </Button>
       </form>
 
       {/* Aktywacja/dezaktywacja */}
       <form
         action={() =>
           start(async () => {
-            setMsg(null);
-            const fd = new FormData();
-            fd.set("id", String(props.id));
-            fd.set("active", String(props.isActive));
-            const res = await toggleActiveAction(fd);
-            setMsg(res.error ?? (res.ok ? (props.isActive ? "Dezaktywowano." : "Aktywowano.") : null));
+            setMsg(null)
+            const fd = new FormData()
+            fd.set("id", String(props.id))
+            fd.set("active", String(props.isActive))
+            const res = await toggleActiveAction(fd)
+            setMsg(res.error ?? (res.ok ? (props.isActive ? "Dezaktywowano." : "Aktywowano.") : null))
           })
         }
       >
-        <button disabled={pending} className="rounded-md border px-2 py-1 hover:bg-neutral-50 disabled:opacity-60">
+        <Button variant="outline" size="sm" disabled={pending}>
           {props.isActive ? "Dezaktywuj" : "Aktywuj"}
-        </button>
+        </Button>
       </form>
 
       {/* Reset hasła */}
@@ -66,21 +95,45 @@ export default function UserRowActions(props: {
         className="flex gap-2"
         action={(fd) =>
           start(async () => {
-            setMsg(null);
-            fd.set("id", String(props.id));
-            const res = await resetPasswordAction(fd);
-            setMsg(res.error ?? (res.ok ? "Hasło ustawione." : null));
+            setMsg(null)
+            fd.set("id", String(props.id))
+            const res = await resetPasswordAction(fd)
+            setMsg(res.error ?? (res.ok ? "Hasło ustawione." : null))
           })
         }
       >
-        <input name="password" type="password" placeholder="Nowe hasło" minLength={8} className="rounded-md border px-2 py-1" />
-        <input name="password2" type="password" placeholder="Powtórz" minLength={8} className="rounded-md border px-2 py-1" />
-        <button disabled={pending} className="rounded-md border px-2 py-1 hover:bg-neutral-50 disabled:opacity-60">
+        <div className="grid gap-1">
+          <Label className="sr-only" htmlFor={`reset-password-${props.id}`}>
+            Nowe hasło
+          </Label>
+          <Input
+            id={`reset-password-${props.id}`}
+            name="password"
+            type="password"
+            placeholder="Nowe hasło"
+            minLength={8}
+            className="h-9"
+          />
+        </div>
+        <div className="grid gap-1">
+          <Label className="sr-only" htmlFor={`reset-password2-${props.id}`}>
+            Powtórz hasło
+          </Label>
+          <Input
+            id={`reset-password2-${props.id}`}
+            name="password2"
+            type="password"
+            placeholder="Powtórz"
+            minLength={8}
+            className="h-9"
+          />
+        </div>
+        <Button variant="outline" size="sm" disabled={pending}>
           Reset
-        </button>
+        </Button>
       </form>
 
-      {msg && <p className="text-xs text-red-600">{msg}</p>}
+      {msg && <p className="text-xs text-destructive">{msg}</p>}
     </td>
-  );
+  )
 }

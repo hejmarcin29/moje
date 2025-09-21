@@ -1,15 +1,24 @@
-import { getSession } from "@/lib/session";
-import { redirect } from "next/navigation";
-import prisma from "@/lib/prisma";
-import { Role } from "@prisma/client";
-import Link from "next/link";
-import { formatArea } from "@/lib/orderTitle";
+import { getSession } from "@/lib/session"
+import { redirect } from "next/navigation"
+import prisma from "@/lib/prisma"
+import { Role } from "@prisma/client"
+import Link from "next/link"
+import { formatArea } from "@/lib/orderTitle"
+import { Button } from "@/components/ui/button"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 export const metadata = { title: "Moje zlecenia — Monter" };
 
 export default async function MyOrdersPage() {
-  const s = await getSession();
-  if (!s || s.user.role !== Role.MONTAZYSTA) redirect("/");
+  const s = await getSession()
+  if (!s || s.user.role !== Role.MONTAZYSTA) redirect("/")
 
   const orders = await prisma.order.findMany({
     where: { assignedToId: s.user.id },
@@ -28,35 +37,35 @@ export default async function MyOrdersPage() {
       measuredArea: true,
       selectedPanel: true,
     },
-  });
+  })
 
-  const toDate = (d: Date | null) => (d ? new Date(d).toISOString().slice(0, 10) : "—");
+  const toDate = (d: Date | null) => (d ? new Date(d).toISOString().slice(0, 10) : "—")
 
   return (
-    <main className="p-8 space-y-8">
+    <main className="space-y-8 p-8">
       <h1 className="text-2xl font-semibold">Moje zlecenia</h1>
 
-      <div className="overflow-x-auto rounded-lg border">
-        <table className="w-full text-sm">
-          <thead className="bg-neutral-50">
-            <tr>
-              <th className="px-3 py-2 text-left">ID</th>
-              <th className="px-3 py-2 text-left">Tytuł</th>
-              <th className="px-3 py-2 text-left">Klient / Adres</th>
-              <th className="px-3 py-2 text-left">Plan</th>
-              <th className="px-3 py-2 text-left">Panele</th>
-              <th className="px-3 py-2 text-left">Akcje</th>
-            </tr>
-          </thead>
-          <tbody>
+      <div className="rounded-lg border">
+        <Table className="text-sm">
+          <TableHeader className="bg-neutral-50">
+            <TableRow>
+              <TableHead>ID</TableHead>
+              <TableHead>Tytuł</TableHead>
+              <TableHead>Klient / Adres</TableHead>
+              <TableHead>Plan</TableHead>
+              <TableHead>Panele</TableHead>
+              <TableHead>Akcje</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {orders.map((o) => (
-              <tr key={o.id} className="border-t align-top">
-                <td className="px-3 py-2">{o.id}</td>
-                <td className="px-3 py-2">
+              <TableRow key={o.id} className="align-top">
+                <TableCell>{o.id}</TableCell>
+                <TableCell>
                   <div className="font-medium">{o.title}</div>
                   <div className="text-xs text-neutral-500">Status: {o.status}</div>
-                </td>
-                <td className="px-3 py-2">
+                </TableCell>
+                <TableCell>
                   <div>{o.customerName ?? "—"}</div>
                   <div className="text-xs text-neutral-500">{o.address ?? "—"}</div>
                   <div className="text-xs text-neutral-500">{o.city ?? "—"}</div>
@@ -64,33 +73,30 @@ export default async function MyOrdersPage() {
                   {o.notes && (
                     <div className="text-xs text-neutral-500">Notatka: {o.notes}</div>
                   )}
-                </td>
-                <td className="px-3 py-2">{toDate(o.plannedDate)}</td>
-                <td className="px-3 py-2 text-xs text-neutral-500">
+                </TableCell>
+                <TableCell>{toDate(o.plannedDate)}</TableCell>
+                <TableCell className="text-xs text-neutral-500">
                   <div className="text-sm text-neutral-700">{o.selectedPanel ?? "—"}</div>
                   <div>Wstępnie: {formatArea(o.initialArea) ?? "—"} m²</div>
                   <div>Pomiar: {formatArea(o.measuredArea) ?? "—"} m²</div>
-                </td>
-                <td className="px-3 py-2">
-                  <Link
-                    href={`/panel-montazysty/zlecenia/${o.id}`}
-                    className="inline-flex items-center rounded-md border px-3 py-1 text-sm font-medium hover:bg-neutral-50"
-                  >
-                    Szczegóły
-                  </Link>
-                </td>
-              </tr>
+                </TableCell>
+                <TableCell>
+                  <Button asChild variant="outline" size="sm">
+                    <Link href={`/panel-montazysty/zlecenia/${o.id}`}>Szczegóły</Link>
+                  </Button>
+                </TableCell>
+              </TableRow>
             ))}
             {orders.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-3 py-6 text-center text-neutral-500">
+              <TableRow>
+                <TableCell colSpan={6} className="px-3 py-6 text-center text-neutral-500">
                   Brak przypisanych zleceń.
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
     </main>
-  );
+  )
 }
