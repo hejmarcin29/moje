@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Lint / Typecheck / Build
+    runs-on: ubuntu-latest
+
+    env:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: 1
+      # osobna testowa baza dla CI (NIE produkcja!)
+      DATABASE_URL: "file:./data/test-ci.db"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install deps
+        run: npm ci
+
+      # Blokada: zmieniono schema.prisma, ale brak migracji
+      - name: Fail if schema changed without migrations
+        shell: bash
+        run: |
+          git fetch origin main
+          CHANGED="$(git diff --name-only origin/main...HEAD)"
+          echo "Changed files:"
+          echo "$CHANGED"
+          if echo "$CHANGED" | grep -q "^prisma/schema.prisma$"; then
+            if ! echo "$CHANGED" | grep -q "^prisma/migrations/"; then
+              echo "ERROR: schema.prisma zmienione, ale brak nowych migracji w prisma/migrations/*"
+              exit 1
+            fi
+          fi
+
+      - name: Prepare test DB folder
+        run: mkdir -p data
+
+      - name: Prisma generate
+        run: npx prisma generate
+
+      # Bezpieczna migracja na testowej DB CI
+      - name: Prisma migrate (test DB)
+        run: |
+          npx prisma migrate deploy || npx prisma migrate dev --name ci --create-only
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Build
+        env:
+          # Jeśli używasz next/font/google i CI ma blokadę sieci,
+          # rozważ przejście na next/font/local. Zwykle build przejdzie.
+          NODE_OPTIONS: --max_old_space_size=4096
+        run: npm run build
