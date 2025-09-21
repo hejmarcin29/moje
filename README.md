@@ -1,5 +1,16 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## UI stack
+- Komponenty: **shadcn/ui** (`@/components/ui/*`)
+- Toasty: **Sonner**
+- Ikony: **lucide-react**
+- Tailwind: **v4** (`@import "tailwindcss"; @plugin "tailwindcss-animate";` w `app/globals.css`)
+### Zasady:
+- Nie używamy surowych `<button/input/select>` gdy istnieje odpowiednik shadcn.
+- Nowe widoki **obowiązkowo** na shadcn/ui.
+- Formularze: client `action={fn}`, walidacja z komunikatem pod polem.
+
+
 ## Getting Started
 
 First, run the development server:
